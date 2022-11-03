@@ -64,6 +64,7 @@ public abstract class GenericAbstractService<T extends AbstractMongoEntity> exte
         entity.setSequence(nextSequence);
       }
     }
+    System.out.println("in generateSlugIfRequired");
   }
 
   protected void generateSlugIfRequired(List<T> entities) {
