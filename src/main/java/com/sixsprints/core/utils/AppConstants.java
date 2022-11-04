@@ -7,10 +7,6 @@ public interface AppConstants {
   String EQUALS = "equals";
 
   String NOT_EQUAL = "notEqual";
-  
-  String EXISTS = "exists";
-  
-  String DOES_NOT_EXIST = "doesNotExist";
 
   String LESS_THAN = "lessThan";
 
