@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -44,7 +43,6 @@ import com.sixsprints.core.dto.filter.NumberColumnFilter;
 import com.sixsprints.core.dto.filter.SearchColumnFilter;
 import com.sixsprints.core.dto.filter.SetColumnFilter;
 import com.sixsprints.core.dto.filter.SortModel;
-import com.sixsprints.core.enums.DataType;
 import com.sixsprints.core.exception.BaseException;
 import com.sixsprints.core.exception.BaseRuntimeException;
 import com.sixsprints.core.exception.EntityNotFoundException;
@@ -301,7 +299,7 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
     } else if (filter instanceof DateColumnFilter) {
       addDateFilter(criterias, key, (DateColumnFilter) filter);
     } else if (filter instanceof SearchColumnFilter) {
-      addSearchCriteria((SearchColumnFilter) filter, criterias);
+      addSearchCriteria(((SearchColumnFilter) filter).getFilter(), criterias);
     } else if (filter instanceof ExactMatchColumnFilter) {
       addExactMatchCriteria(criterias, key, (ExactMatchColumnFilter) filter);
     }
@@ -387,53 +385,12 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
 
   private void addDateFilter(List<Criteria> criterias, String key, DateColumnFilter filter) {
     Criteria criteria = setKeyCriteria(key);
-    criteria = dateCriteria(filter.getType(), filter.getFilter(), filter.getFilterTo(), filter.isExactMatch(),
-      criteria);
+    criteria = dateCriteria(filter.getType(), filter.getFilter(), filter.getFilterTo(), criteria);
     criterias.add(criteria);
   }
 
-  private void exactDateCriteria(String type, Long filterEpoch, Long filterToEpoch, Criteria criteria) {
-
-    DateTime filter = DateUtil.instance().build().initDateFromLong(filterEpoch);
-    DateTime filterTo = DateUtil.instance().build().initDateFromLong(filterToEpoch);
-
-    switch (type) {
-    case AppConstants.EQUALS:
-      criteria.is(filter);
-      break;
-
-    case AppConstants.NOT_EQUAL:
-      criteria.ne(filter);
-      break;
-
-    case AppConstants.LESS_THAN:
-      criteria.lt(filter);
-      break;
-
-    case AppConstants.LESS_THAN_OR_EQUAL:
-      criteria.lte(filter);
-      break;
-
-    case AppConstants.GREATER_THAN:
-      criteria.gt(filter);
-      break;
-
-    case AppConstants.GREATER_THAN_OR_EQUAL:
-      criteria.gte(filter);
-      break;
-
-    case AppConstants.IN_RANGE:
-      criteria.lte(filterTo).gte(filter);
-      break;
-    }
-  }
-
-  private Criteria dateCriteria(String type, Long filter, Long filterTo, boolean isExactMatch, Criteria criteria2) {
+  private Criteria dateCriteria(String type, Long filter, Long filterTo, Criteria criteria2) {
     Criteria criteria = new Criteria(criteria2.getKey());
-    if (isExactMatch) {
-      exactDateCriteria(type, filter, filterTo, criteria);
-      return criteria;
-    }
     switch (type) {
     case AppConstants.EQUALS:
       criteria.lte(DateUtil.instance().build().endOfDay(filter)).gte(DateUtil.instance().build().startOfDay(filter));
@@ -467,17 +424,17 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
     return criteria;
   }
 
-  private void addSearchCriteria(SearchColumnFilter filter, List<Criteria> criterias) {
+  private void addSearchCriteria(String searchKey, List<Criteria> criterias) {
     List<Criteria> searchCriteria = Lists.newArrayList();
-    String quote = Pattern.quote(filter.getFilter());
+    String quote = Pattern.quote(searchKey);
 
-    List<FieldDto> fields = buildSearchFields(filter);
+    List<FieldDto> fields = metaData().getFields();
 
     if (CollectionUtils.isEmpty(fields)) {
       return;
     }
 
-    if (!filter.isSlugExcludedFromSearch() && !fields.contains(FieldDto.builder().name(SLUG).build())) {
+    if (!fields.contains(FieldDto.builder().name(SLUG).build())) {
       searchCriteria.add(setKeyCriteria(SLUG).regex(quote, IGNORE_CASE_FLAG));
     }
     for (FieldDto field : fields) {
@@ -492,42 +449,8 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
 
   }
 
-  private List<FieldDto> buildSearchFields(SearchColumnFilter filter) {
-    List<FieldDto> fields = new ArrayList<>();
-    if (CollectionUtils.isEmpty(filter.getFields())) {
-      return metaData().getFields();
-    }
-
-    for (String fieldName : filter.getFields()) {
-      fields.add(FieldDto.builder().name(fieldName).dataType(DataType.TEXT).build());
-    }
-    return fields;
-  }
-
   private void addExactMatchCriteria(List<Criteria> criterias, String key, ExactMatchColumnFilter filter) {
-    String type = filter.getType();
-
-    switch (type) {
-    case AppConstants.EQUALS:
-      criterias.add(setKeyCriteria(key).is(filter.getFilter()));
-      break;
-
-    case AppConstants.NOT_EQUAL:
-      criterias.add(setKeyCriteria(key).ne(filter.getFilter()));
-      break;
-
-    case AppConstants.EXISTS:
-      criterias.add(setKeyCriteria(key).exists(true));
-      break;
-
-    case AppConstants.DOES_NOT_EXIST:
-      criterias.add(setKeyCriteria(key).exists(false));
-      break;
-
-    default:
-      criterias.add(setKeyCriteria(key).is(filter.getFilter()));
-      break;
-    }
+    criterias.add(setKeyCriteria(key).is(filter.getFilter()));
   }
 
   private Criteria setKeyCriteria(String key) {

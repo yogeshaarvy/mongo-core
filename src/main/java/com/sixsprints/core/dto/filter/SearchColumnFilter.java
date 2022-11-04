@@ -1,7 +1,5 @@
 package com.sixsprints.core.dto.filter;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +14,5 @@ import lombok.NoArgsConstructor;
 public class SearchColumnFilter extends ColumnFilter {
 
   private String filter;
-
-  private List<String> fields;
-  
-  private boolean slugExcludedFromSearch;
 
 }

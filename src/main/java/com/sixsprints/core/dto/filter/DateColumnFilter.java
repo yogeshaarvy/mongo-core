@@ -19,7 +19,4 @@ public class DateColumnFilter extends ColumnFilter {
 
   private Long filterTo;
 
-  @Builder.Default
-  private boolean exactMatch = Boolean.FALSE;
-
 }

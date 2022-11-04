@@ -82,7 +82,7 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
   }
 
   protected String getDatabase() {
-    return database == null ? "test-db" : database;
+    return database == null ? "test-db" : host;
   }
 
   protected Integer getPort() {
