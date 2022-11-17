@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -434,34 +435,35 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
       exactDateCriteria(type, filter, filterTo, criteria);
       return criteria;
     }
+    DateUtil dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("UTC")).build();
     switch (type) {
     case AppConstants.EQUALS:
-      criteria.lte(DateUtil.instance().build().endOfDay(filter)).gte(DateUtil.instance().build().startOfDay(filter));
+      criteria.lte(dateUtil.endOfDay(filter)).gte(dateUtil.startOfDay(filter));
       break;
 
     case AppConstants.NOT_EQUAL:
       return new Criteria().orOperator(
-        new Criteria(criteria2.getKey()).lt(DateUtil.instance().build().startOfDay(filter)),
-        new Criteria(criteria2.getKey()).gt(DateUtil.instance().build().endOfDay(filter)));
+        new Criteria(criteria2.getKey()).lt(dateUtil.startOfDay(filter)),
+        new Criteria(criteria2.getKey()).gt(dateUtil.endOfDay(filter)));
 
     case AppConstants.LESS_THAN:
-      criteria.lt(DateUtil.instance().build().startOfDay(filter));
+      criteria.lt(dateUtil.startOfDay(filter));
       break;
 
     case AppConstants.LESS_THAN_OR_EQUAL:
-      criteria.lte(DateUtil.instance().build().endOfDay(filter));
+      criteria.lte(dateUtil.endOfDay(filter));
       break;
 
     case AppConstants.GREATER_THAN:
-      criteria.gt(DateUtil.instance().build().endOfDay(filter));
+      criteria.gt(dateUtil.endOfDay(filter));
       break;
 
     case AppConstants.GREATER_THAN_OR_EQUAL:
-      criteria.gte(DateUtil.instance().build().startOfDay(filter));
+      criteria.gte(dateUtil.startOfDay(filter));
       break;
 
     case AppConstants.IN_RANGE:
-      criteria.lte(DateUtil.instance().build().endOfDay(filterTo)).gte(DateUtil.instance().build().startOfDay(filter));
+      criteria.lte(dateUtil.endOfDay(filterTo)).gte(dateUtil.startOfDay(filter));
       break;
     }
     return criteria;
