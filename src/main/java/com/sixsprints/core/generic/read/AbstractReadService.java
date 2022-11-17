@@ -435,7 +435,7 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
       exactDateCriteria(type, filter, filterTo, criteria);
       return criteria;
     }
-    DateUtil dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("+00:00")).build();
+    DateUtil dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("UTC")).build();
     switch (type) {
     case AppConstants.EQUALS:
       criteria.lte(dateUtil.endOfDay(filter)).gte(dateUtil.startOfDay(filter));
