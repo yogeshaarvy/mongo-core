@@ -429,13 +429,25 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
     }
   }
 
+  DateUtil dateUtil = null;
+
+  public DateUtil getDateUtil() {
+    return dateUtil;
+  }
+
+  public void setDateUtil(DateUtil dateUtil) {
+    this.dateUtil = dateUtil;
+  }
+
   private Criteria dateCriteria(String type, Long filter, Long filterTo, boolean isExactMatch, Criteria criteria2) {
     Criteria criteria = new Criteria(criteria2.getKey());
     if (isExactMatch) {
       exactDateCriteria(type, filter, filterTo, criteria);
       return criteria;
     }
-    DateUtil dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("UTC")).build();
+    if (dateUtil == null) {
+      dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("UTC")).build();
+    }
     switch (type) {
     case AppConstants.EQUALS:
       criteria.lte(dateUtil.endOfDay(filter)).gte(dateUtil.startOfDay(filter));
