@@ -446,7 +446,7 @@ public abstract class AbstractReadService<T extends AbstractMongoEntity> extends
       return criteria;
     }
     if (dateUtil == null) {
-      dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("UTC")).build();
+      dateUtil = DateUtil.instance().timeZone(DateTimeZone.forID("+05:30")).build();
     }
     switch (type) {
     case AppConstants.EQUALS:
