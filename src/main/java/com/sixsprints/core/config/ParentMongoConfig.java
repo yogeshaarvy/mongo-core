@@ -45,9 +45,7 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
 
   @Override
   public MongoClient mongoClient() {
-     StringBuilder connectionString = new StringBuilder("mongodb+srv://").append(getHost()).append(":").append(getPort())
-      .append("/")
-      .append(getDatabase());
+     StringBuilder connectionString = new StringBuilder("mongodb+srv://").append(getHost());
    /* doadmin:show-password@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
   
     StringBuilder connectionString = new StringBuilder("mongodb://").append(getHost()).append(":").append(getPort())
