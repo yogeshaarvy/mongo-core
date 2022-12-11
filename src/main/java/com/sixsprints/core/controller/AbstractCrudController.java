@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +28,7 @@ import com.sixsprints.core.utils.AppConstants;
 import com.sixsprints.core.utils.RestResponse;
 import com.sixsprints.core.utils.RestUtil;
 
-public abstract class AbstractCrudController<T extends AbstractMongoEntity, DTO, U> {
+public abstract class AbstractCrudController<T extends AbstractMongoEntity, DTO> {
 
   private GenericCrudService<T> service;
 
@@ -40,50 +40,50 @@ public abstract class AbstractCrudController<T extends AbstractMongoEntity, DTO,
   }
 
   @PutMapping
-  public ResponseEntity<?> patch(U user, @RequestBody @Valid DTO dto, @RequestParam String propChanged)
+  public ResponseEntity<?> patch(@RequestBody @Validated DTO dto, @RequestParam String propChanged)
     throws BaseException {
     T domain = mapper.toDomain(dto);
     return RestUtil.successResponse(service.patchUpdate(domain.getId(), domain, propChanged));
   }
 
   @PostMapping
-  public ResponseEntity<RestResponse<DTO>> add(U user, @RequestBody @Valid DTO dto)
+  public ResponseEntity<RestResponse<DTO>> add(@RequestBody @Validated DTO dto)
     throws BaseException {
     return RestUtil.successResponse(mapper.toDto(service.create(mapper.toDomain(dto))));
   }
 
   @GetMapping("/{slug}")
-  public ResponseEntity<RestResponse<DTO>> findBySlug(U user, @PathVariable String slug)
+  public ResponseEntity<RestResponse<DTO>> findBySlug(@PathVariable String slug)
     throws EntityNotFoundException {
     return RestUtil.successResponse(mapper.toDto(service.findBySlug(slug)));
   }
 
   @PostMapping("/search")
-  public ResponseEntity<RestResponse<PageDto<DTO>>> filter(U user, @RequestBody FilterRequestDto filterRequestDto) {
+  public ResponseEntity<RestResponse<PageDto<DTO>>> filter(@RequestBody FilterRequestDto filterRequestDto) {
     return RestUtil.successResponse(mapper.pageEntityToPageDtoDto(service.filter(filterRequestDto)));
   }
 
   @PostMapping("/column/master")
-  public ResponseEntity<RestResponse<List<String>>> getDistinctValues(@RequestParam String column,
-    U user, @RequestBody FilterRequestDto filterRequestDto) {
+  public ResponseEntity<RestResponse<List<?>>> getDistinctValues(@RequestParam String column,
+    @RequestBody FilterRequestDto filterRequestDto) {
     return RestUtil.successResponse(service.distinctColumnValues(column, filterRequestDto));
   }
 
   @PostMapping("/delete")
-  public ResponseEntity<?> delete(U user, @RequestBody List<String> ids) throws EntityNotFoundException {
+  public ResponseEntity<?> delete(@RequestBody List<String> ids) throws EntityNotFoundException {
     service.delete(ids);
     return RestUtil.successResponse(null);
   }
 
   @PostMapping(value = "/export", produces = "text/csv")
-  public void download(U user,
+  public void download(
     @RequestBody FilterRequestDto filterRequestDto, HttpServletResponse response, Locale locale)
     throws BaseException, IOException {
     service.exportData(mapper, filterRequestDto, response.getWriter(), locale);
   }
 
   @PostMapping("/import")
-  public ResponseEntity<?> upload(U user, @RequestParam(value = "file", required = true) MultipartFile file,
+  public ResponseEntity<?> upload(@RequestParam(value = "file", required = true) MultipartFile file,
     Locale locale) throws IOException, BaseException {
 
     ImportResponseWrapper<DTO> importResponseWrapper = service.importData(file.getInputStream(), locale);
