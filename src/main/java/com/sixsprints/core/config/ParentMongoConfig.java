@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.CustomConversions;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
@@ -22,23 +23,41 @@ import com.sixsprints.core.converters.LocalTimeToIntegerConverter;
 import com.sixsprints.core.converters.StringToClassConverter;
 import com.sixsprints.core.repository.InheritanceAwareMongoRepositoryFactoryBean;
 
+
 @Configuration
 @EnableMongoRepositories(repositoryFactoryBeanClass = InheritanceAwareMongoRepositoryFactoryBean.class, basePackages = "com.sixsprints.core")
 public class ParentMongoConfig extends AbstractMongoClientConfiguration {
+
+  private String host;
+
+  private String database;
+
+  private Integer port;
 
   @Bean
   public MongoTransactionManager transactionManager(MongoDbFactory dbFactory) {
     return new MongoTransactionManager(dbFactory);
   }
 
-  @Bean
   @Override
-  public MongoClient mongoClient() {
-    return MongoClients.create(uri());
+  protected String getDatabaseName() {
+    return getDatabase();
   }
 
   @Override
-  public MongoCustomConversions customConversions() {
+  public MongoClient mongoClient() {
+//     StringBuilder connectionString = new StringBuilder("mongodb+srv://").append(getHost());
+    //doadmin:show-password@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
+    String conString = "mongodb+srv://doadmin:A4Qg25P7h6q30o8W@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com";
+
+    StringBuilder connectionString = new StringBuilder("mongodb://").append(getHost()).append(":").append(getPort())
+            .append("/")
+            .append(getDatabase());
+    return MongoClients.create(/*connectionString.toString()*/conString);
+  }
+
+  @Override
+  public CustomConversions customConversions() {
     List<Converter<?, ?>> converters = converters();
     return new MongoCustomConversions(converters);
   }
@@ -58,13 +77,21 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
     return converters;
   }
 
-  protected String uri() {
-    return "mongodb+srv://doadmin:A4Qg25P7h6q30o8W@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com/admin?tls=true&authSource=admin";
+  @Bean
+  public com.mongodb.MongoClient client() {
+    return new com.mongodb.MongoClient(getHost(), getPort());
   }
 
-  @Override
-  protected String getDatabaseName() {
-    return "admin";
+  protected String getHost() {
+    return host == null ? "localhost" : host;
+  }
+
+  protected String getDatabase() {
+    return database == null ? "test-db" : database;
+  }
+
+  protected Integer getPort() {
+    return port == null ? 27017 : port;
   }
 
 }
