@@ -31,7 +31,7 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
 
   private String database;
 
-  private Integer port;
+  private String port;
 
   @Bean
   public MongoTransactionManager transactionManager(MongoDbFactory dbFactory) {
@@ -90,7 +90,7 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
     return database == null ? "test-db" : database;
   }
 
-  protected Integer getPort() {
+  protected String getPort() {
     return port == null ? 27017 : port;
   }
 
