@@ -59,12 +59,12 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
   }
 
   protected String uri() {
-    return "mongodb://localhost/" + getDatabaseName();
+    return "mongodb+srv://doadmin:A4Qg25P7h6q30o8W@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com/admin?tls=true&authSource=admin";
   }
 
   @Override
   protected String getDatabaseName() {
-    return "testdb";
+    return "admin";
   }
 
 }
