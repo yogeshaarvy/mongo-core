@@ -23,7 +23,6 @@ import com.sixsprints.core.converters.LocalTimeToIntegerConverter;
 import com.sixsprints.core.converters.StringToClassConverter;
 import com.sixsprints.core.repository.InheritanceAwareMongoRepositoryFactoryBean;
 
-
 @Configuration
 @EnableMongoRepositories(repositoryFactoryBeanClass = InheritanceAwareMongoRepositoryFactoryBean.class, basePackages = "com.sixsprints.core")
 public class ParentMongoConfig extends AbstractMongoClientConfiguration {
@@ -46,14 +45,10 @@ public class ParentMongoConfig extends AbstractMongoClientConfiguration {
 
   @Override
   public MongoClient mongoClient() {
-//     StringBuilder connectionString = new StringBuilder("mongodb+srv://").append(getHost());
-    //doadmin:show-password@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
-    String conString = "mongodb+srv://doadmin:A4Qg25P7h6q30o8W@db-mongodb-nyc1-12166-737323db.mongo.ondigitalocean.com";
-
     StringBuilder connectionString = new StringBuilder("mongodb://").append(getHost()).append(":").append(getPort())
             .append("/")
             .append(getDatabase());
-    return MongoClients.create(/*connectionString.toString()*/conString);
+    return MongoClients.create(connectionString.toString());
   }
 
   @Override
