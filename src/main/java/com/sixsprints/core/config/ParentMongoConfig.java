@@ -23,6 +23,7 @@ import com.sixsprints.core.converters.LocalTimeToIntegerConverter;
 import com.sixsprints.core.converters.StringToClassConverter;
 import com.sixsprints.core.repository.InheritanceAwareMongoRepositoryFactoryBean;
 
+
 @Configuration
 @EnableMongoRepositories(repositoryFactoryBeanClass = InheritanceAwareMongoRepositoryFactoryBean.class, basePackages = "com.sixsprints.core")
 public class ParentMongoConfig extends AbstractMongoClientConfiguration {
